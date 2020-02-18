@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quizapp/question_controller.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 void main() => runApp(MyApp());
 QuestionController qc = new QuestionController();
@@ -30,21 +31,70 @@ class QuizPage extends StatefulWidget {
 
 class _QuizPageState extends State<QuizPage> {
   List<Widget> scoreKeeper = [];
+  int rightAnswer = 0;
 
-  int questionNo = 0;
+  void checkAnswer(bool userAnswer) {
+    setState(() {
+      if (qc.isFinished()) {
+        Alert(
+            context: context,
+            title: "The no. of question is finished",
+            desc: "You have answered $rightAnswer questions",
+            buttons: [
+              DialogButton(
+                child: Text(
+                  "Okay",
+                  style: TextStyle(color: Colors.white),
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                color: Colors.blue,
+              )
+            ]).show();
+        qc.reset();
+        scoreKeeper.clear();
+        rightAnswer = 0;
+      } else {
+        if (qc.getAnswerResult() == userAnswer) {
+          scoreKeeper.add(
+            Icon(Icons.check, color: Colors.green),
+          );
+          rightAnswer++;
+        } else {
+          scoreKeeper.add(
+            Icon(Icons.close, color: Colors.red),
+          );
+        }
+        qc.nextQuestion();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            "Right Answer: $rightAnswer",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+            ),
+          ),
+        ),
         Expanded(
           flex: 5,
           child: Padding(
             padding: EdgeInsets.all(10.0),
             child: Center(
               child: Text(
-                qc.questions[questionNo].questionText,
+                qc.getQuestionText(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 25.0,
@@ -67,19 +117,7 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               onPressed: () {
-                setState(() {
-                  if (qc.questions[questionNo].answerResult == true) {
-                    scoreKeeper.add(
-                      Icon(Icons.check, color: Colors.green),
-                    );
-                  } else {
-                    scoreKeeper.add(
-                      Icon(Icons.close, color: Colors.red),
-                    );
-                  }
-
-                  questionNo++;
-                });
+                checkAnswer(true);
               },
             ),
           ),
@@ -97,25 +135,16 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               onPressed: () {
-                setState(() {
-                  if (qc.questions[questionNo].answerResult == false) {
-                    scoreKeeper.add(
-                      Icon(Icons.check, color: Colors.green),
-                    );
-                  } else {
-                    scoreKeeper.add(
-                      Icon(Icons.close, color: Colors.red),
-                    );
-                  }
-
-                  questionNo++;
-                });
+                checkAnswer(false);
               },
             ),
           ),
         ),
-        Row(
-          children: scoreKeeper,
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: scoreKeeper,
+          ),
         )
       ],
     );

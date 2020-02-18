@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:quizapp/question_controller.dart';
 
 void main() => runApp(MyApp());
+QuestionController qc = new QuestionController();
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -27,6 +29,9 @@ class QuizPage extends StatefulWidget {
 }
 
 class _QuizPageState extends State<QuizPage> {
+  List<Widget> scoreKeeper = [];
+
+  int questionNo = 0;
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -39,7 +44,7 @@ class _QuizPageState extends State<QuizPage> {
             padding: EdgeInsets.all(10.0),
             child: Center(
               child: Text(
-                "How are you?",
+                qc.questions[questionNo].questionText,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 25.0,
@@ -61,7 +66,21 @@ class _QuizPageState extends State<QuizPage> {
                   color: Colors.white,
                 ),
               ),
-              onPressed: () {},
+              onPressed: () {
+                setState(() {
+                  if (qc.questions[questionNo].answerResult == true) {
+                    scoreKeeper.add(
+                      Icon(Icons.check, color: Colors.green),
+                    );
+                  } else {
+                    scoreKeeper.add(
+                      Icon(Icons.close, color: Colors.red),
+                    );
+                  }
+
+                  questionNo++;
+                });
+              },
             ),
           ),
         ),
@@ -77,10 +96,27 @@ class _QuizPageState extends State<QuizPage> {
                   color: Colors.white,
                 ),
               ),
-              onPressed: () {},
+              onPressed: () {
+                setState(() {
+                  if (qc.questions[questionNo].answerResult == false) {
+                    scoreKeeper.add(
+                      Icon(Icons.check, color: Colors.green),
+                    );
+                  } else {
+                    scoreKeeper.add(
+                      Icon(Icons.close, color: Colors.red),
+                    );
+                  }
+
+                  questionNo++;
+                });
+              },
             ),
           ),
         ),
+        Row(
+          children: scoreKeeper,
+        )
       ],
     );
   }
